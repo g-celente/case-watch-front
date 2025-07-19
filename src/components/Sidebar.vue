@@ -1,0 +1,125 @@
+<template>
+  <aside class="fixed left-0 top-0 z-40 h-screen w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transition-transform" :class="{ '-translate-x-full': !isOpen, 'translate-x-0': isOpen }">
+    <div class="h-full px-3 py-4 overflow-y-auto">
+      <!-- Logo -->
+      <div class="flex items-center mb-8 px-3">
+        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mr-3">
+          <CheckSquare class="w-5 h-5 text-white" />
+        </div>
+        <span class="text-xl font-semibold text-gray-900 dark:text-white">TaskManager</span>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="space-y-2">
+        <router-link
+          v-for="item in navigationItems"
+          :key="item.name"
+          :to="item.path"
+          class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors"
+          :class="[
+            $route.path === item.path
+              ? 'bg-primary text-white'
+              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+          ]"
+        >
+          <component :is="item.icon" class="w-5 h-5 mr-3" />
+          {{ item.name }}
+        </router-link>
+      </nav>
+
+      <!-- User Section -->
+      <div class="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex items-center px-3 py-2">
+          <div class="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center mr-3">
+            <User class="w-4 h-4 text-gray-600 dark:text-gray-300" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+              {{ user?.name || 'Usuário' }}
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+              {{ user?.email }}
+            </p>
+          </div>
+          <button
+            @click="handleLogout"
+            class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            title="Logout"
+          >
+            <LogOut class="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Overlay for mobile -->
+  <div
+    v-if="isOpen && isMobile"
+    class="fixed inset-0 z-30 bg-black bg-opacity-50 lg:hidden"
+    @click="$emit('toggle')"
+  ></div>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth/auth.js'
+import { CheckSquare, LayoutDashboard, CheckCircle, FolderOpen, Users, BarChart3, User, LogOut } from 'lucide-vue-next'
+
+defineProps({
+  isOpen: {
+    type: Boolean,
+    default: true
+  },
+  isMobile: {
+    type: Boolean,
+    default: false
+  }
+})
+
+defineEmits(['toggle'])
+
+const router = useRouter()
+const authStore = useAuthStore()
+
+const user = computed(() => authStore.user)
+
+const navigationItems = [
+  {
+    name: 'Dashboard',
+    path: '/dashboard',
+    icon: LayoutDashboard
+  },
+  {
+    name: 'Tarefas',
+    path: '/tasks',
+    icon: CheckCircle
+  },
+  {
+    name: 'Categorias',
+    path: '/categories',
+    icon: FolderOpen
+  },
+  {
+    name: 'Usuários',
+    path: '/users',
+    icon: Users
+  },
+  {
+    name: 'Relatórios',
+    path: '/reports',
+    icon: BarChart3
+  }
+]
+
+const handleLogout = async () => {
+  try {
+    await authStore.logout()
+    router.push('/login')
+  } catch (error) {
+    console.error('Erro ao fazer logout:', error)
+    router.push('/login')
+  }
+}
+</script>
