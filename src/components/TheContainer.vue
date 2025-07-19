@@ -1,67 +1,58 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div class="min-h-screen bg-white">
     <!-- Sidebar -->
     <Sidebar :is-open="sidebarOpen" :is-mobile="isMobile" @toggle="toggleSidebar" />
 
     <!-- Main Content -->
     <div class="transition-all duration-300" :class="{ 'lg:ml-64': sidebarOpen, 'lg:ml-0': !sidebarOpen }">
       <!-- Header -->
-      <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between items-center h-16">
             <!-- Mobile menu button -->
             <button
               @click="toggleSidebar"
-              class="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+              class="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
             >
               <Menu class="w-6 h-6" />
             </button>
 
             <!-- Page title -->
             <div class="flex-1 min-w-0 px-4 lg:px-0">
-              <h1 class="text-2xl font-semibold text-gray-900 dark:text-white truncate">
+              <h1 class="text-2xl font-semibold text-gray-900 truncate">
                 {{ pageTitle }}
               </h1>
             </div>
 
             <!-- Header actions -->
             <div class="flex items-center space-x-4">
-              <!-- Dark mode toggle -->
-              <button
-                @click="toggleDarkMode"
-                class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
-              >
-                <Sun v-if="isDark" class="w-5 h-5" />
-                <Moon v-else class="w-5 h-5" />
-              </button>
-
               <!-- User menu -->
               <div class="relative">
                 <button
                   @click="showUserMenu = !showUserMenu"
-                  class="flex items-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+                  class="flex items-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
                 >
-                  <div class="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                    <User class="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                  <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                    <User class="w-4 h-4 text-gray-600" />
                   </div>
                 </button>
 
                 <!-- Dropdown menu -->
                 <div
                   v-if="showUserMenu"
-                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+                  class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
                   @click.away="showUserMenu = false"
                 >
                   <button
                     @click="handleProfile"
-                    class="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     <User class="w-4 h-4 mr-3" />
                     Perfil
                   </button>
                   <button
                     @click="handleLogout"
-                    class="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     <LogOut class="w-4 h-4 mr-3" />
                     Logout
@@ -74,7 +65,7 @@
       </header>
 
       <!-- Page Content -->
-      <main class="p-4 sm:p-6 lg:p-8">
+      <main class="p-4 sm:p-6 lg:p-8 bg-white">
         <slot />
       </main>
     </div>
@@ -86,16 +77,12 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth/auth.js'
 import { useDark, useToggle } from '@vueuse/core'
-import { Menu, User, LogOut, Sun, Moon } from 'lucide-vue-next'
+import { Menu, User, LogOut } from 'lucide-vue-next'
 import Sidebar from './Sidebar.vue'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
-
-// Dark mode
-const isDark = useDark()
-const toggleDarkMode = useToggle(isDark)
 
 // Sidebar state
 const sidebarOpen = ref(true)
