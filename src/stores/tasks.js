@@ -94,6 +94,46 @@ export const useTasksStore = defineStore('tasks', () => {
         }
     }
 
+    const fetchMyTasks = async (params = {}) => {
+        try {
+            loading.value = true
+            error.value = null
+
+            const merged = {
+                page: pagination.value.page,
+                limit: pagination.value.limit,
+                ...filters.value,
+                ...params
+            }
+
+            // Remove filtros vazios
+            const queryParams = Object.fromEntries(
+                Object.entries(merged).filter(([_, v]) =>
+                    v !== '' && v !== null && v !== undefined && v !== false
+                )
+            )
+
+            const response = await api.tasks.getMyTasks(queryParams)
+
+            if (response.data.success) {
+                const data = response.data.data
+                tasks.value = data.tasks || data
+
+                if (data.pagination) {
+                    pagination.value = {
+                        ...pagination.value,
+                        ...data.pagination
+                    }
+                }
+            }
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erro ao carregar minhas tarefas'
+            console.error('Erro ao buscar minhas tarefas:', err)
+        } finally {
+            loading.value = false
+        }
+    }
+
     const fetchTask = async (id) => {
         try {
             loading.value = true
@@ -411,8 +451,24 @@ export const useTasksStore = defineStore('tasks', () => {
             }
         }
 
-        // If user is the assignee, they can edit
-        if (task.assignee?.id === userId) {
+        // If user is the owner, they have full permissions
+        // Check both ownerId and owner.id for compatibility
+        const isOwner = task.owner?.id === userId || task.ownerId === userId
+        if (isOwner) {
+            return {
+                canEdit: true,
+                canDelete: true,
+                canManageCollaborators: true,
+                canAssign: true,
+                currentUserRole: 'OWNER'
+            }
+        }
+
+        // If user is the assignee (check both singular and plural formats)
+        const isAssignee = task.assignee?.id === userId || 
+                          (task.assignees && Array.isArray(task.assignees) && task.assignees.some(a => a.id === userId))
+        
+        if (isAssignee) {
             return {
                 canEdit: true,
                 canDelete: false,
@@ -475,6 +531,7 @@ export const useTasksStore = defineStore('tasks', () => {
 
         // Actions
         fetchTasks,
+        fetchMyTasks,
         fetchTask,
         createTask,
         updateTask,

@@ -329,13 +329,32 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end space-x-2">
-                                        <Button variant="ghost" size="sm" @click.stop="editTask(task)">
+                                        <!-- Show edit button only if user can edit -->
+                                        <Button 
+                                            v-if="canUserEditTask(task)"
+                                            variant="ghost" 
+                                            size="sm" 
+                                            @click.stop="editTask(task)"
+                                        >
                                             <Edit2 class="w-4 h-4" />
                                         </Button>
-                                        <Button variant="ghost" size="sm" @click.stop="confirmDeleteTask(task)"
-                                            class="text-red-600 hover:text-red-700">
+                                        <!-- Show delete button only if user can delete -->
+                                        <Button 
+                                            v-if="canUserDeleteTask(task)"
+                                            variant="ghost" 
+                                            size="sm" 
+                                            @click.stop="confirmDeleteTask(task)"
+                                            class="text-red-600 hover:text-red-700"
+                                        >
                                             <Trash2 class="w-4 h-4" />
                                         </Button>
+                                        <!-- Show view-only indicator if user has no edit permissions -->
+                                        <span 
+                                            v-if="!canUserEditTask(task) && !canUserDeleteTask(task)"
+                                            class="text-gray-400 text-xs px-2 py-1 rounded-full bg-gray-100"
+                                        >
+                                            👁️ Visualizador
+                                        </span>
                                     </div>
                                 </td>
                             </tr>
@@ -404,6 +423,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useTasksStore } from '../stores/tasks.js'
 import { useCategoriesStore } from '../stores/categories.js'
+import { useAuthStore } from '../stores/auth/auth.js'
 import { useToast } from '../composables/useToast.js'
 import {
     Plus,
@@ -440,6 +460,7 @@ import TaskDetail from '../components/task/TaskDetail.vue'
 
 const tasksStore = useTasksStore()
 const categoriesStore = useCategoriesStore()
+const authStore = useAuthStore()
 const toast = useToast()
 
 // Dialog states
@@ -506,6 +527,31 @@ const changePage = (page) => {
     tasksStore.fetchTasks()
 }
 
+// Permission checking functions
+const getUserTaskPermissions = (task) => {
+    if (!authStore.currentUser || !task) return { canEdit: false, canDelete: false, canView: true }
+    
+    const userPermissions = tasksStore.getUserPermissions(task.id, authStore.currentUser.id)
+    const isAssignee = task.assignee?.id === authStore.currentUser.id || 
+                      (task.assignees && Array.isArray(task.assignees) && task.assignees.some(a => a.id === authStore.currentUser.id))
+    
+    return {
+        canEdit: userPermissions.canEdit || isAssignee,
+        canDelete: userPermissions.canDelete,
+        canView: userPermissions.canView || isAssignee
+    }
+}
+
+const canUserEditTask = (task) => {
+    return getUserTaskPermissions(task).canEdit
+}
+
+const canUserDeleteTask = (task) => {
+    return getUserTaskPermissions(task).canDelete
+}
+
+// Task operations
+
 // Task operations
 const openCreateDialog = () => {
     selectedTask.value = null
@@ -513,6 +559,11 @@ const openCreateDialog = () => {
 }
 
 const editTask = (task) => {
+    // Check if user has permission to edit
+    if (!canUserEditTask(task)) {
+        toast.error('Você não tem permissão para editar esta tarefa')
+        return
+    }
     selectedTask.value = task
     showTaskDialog.value = true
 }
@@ -546,6 +597,11 @@ const handleTaskSaved = () => {
 }
 
 const confirmDeleteTask = (task) => {
+    // Check if user has permission to delete
+    if (!canUserDeleteTask(task)) {
+        toast.error('Você não tem permissão para excluir esta tarefa')
+        return
+    }
     taskToDelete.value = task
     showDeleteDialog.value = true
 }

@@ -221,6 +221,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <select
+                  v-if="canUserEditTask(task)"
                   :value="task.status"
                   @change="updateTaskStatus(task.id, $event.target.value)"
                   class="text-xs border-0 bg-transparent focus:ring-0 rounded-full px-2 py-1"
@@ -230,6 +231,13 @@
                   <option value="IN_PROGRESS">Em Progresso</option>
                   <option value="COMPLETED">Concluída</option>
                 </select>
+                <span 
+                  v-else
+                  :class="getStatusClass(task.status)" 
+                  class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                >
+                  {{ getStatusLabel(task.status) }}
+                </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span :class="getPriorityClass(task.priority)" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
@@ -261,6 +269,7 @@
                     <Eye class="h-4 w-4" />
                   </button>
                   <button
+                    v-if="canUserEditTask(task)"
                     @click="editTask(task)"
                     class="text-blue-600 hover:text-blue-900"
                     title="Editar tarefa"
@@ -268,13 +277,21 @@
                     <Edit3 class="h-4 w-4" />
                   </button>
                   <button
-                    v-if="task.status !== 'COMPLETED'"
+                    v-if="canUserEditTask(task) && task.status !== 'COMPLETED'"
                     @click="markAsCompleted(task)"
                     class="text-green-600 hover:text-green-900"
                     title="Marcar como concluída"
                   >
                     <CheckCircle class="h-4 w-4" />
                   </button>
+                  <!-- Indicator for view-only access -->
+                  <span
+                    v-if="!canUserEditTask(task)"
+                    class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full"
+                    title="Acesso somente leitura"
+                  >
+                    👁️ Visualizador
+                  </span>
                 </div>
               </td>
             </tr>
@@ -426,9 +443,8 @@ const filters = ref({
 
 // Computed
 const myTasks = computed(() => {
-  return tasksStore.tasks.filter(task => 
-    task.assignee?.id === authStore.currentUser?.id
-  )
+  // Since we're using fetchMyTasks, the store already contains only user's tasks
+  return tasksStore.tasks
 })
 
 const myTasksStats = computed(() => {
@@ -482,6 +498,51 @@ const hasActiveFilters = computed(() => {
 })
 
 // Methods
+const getUserTaskPermissions = (task) => {
+  if (!task || !authStore.currentUser) {
+    return { canEdit: false, canDelete: false, canView: true }
+  }
+
+  const currentUserId = authStore.currentUser.id
+  
+  // Check if user is the owner (both ownerId and owner.id for compatibility)
+  const isOwner = task.owner.id === currentUserId || task.ownerId === currentUserId
+  console.log(isOwner)
+  if (isOwner) {
+    return { canEdit: true, canDelete: true, canView: true }
+  }
+  
+  // Check if user is the assignee (both singular and plural formats)
+  const isAssignee = task.assignee?.id === currentUserId || 
+                    (task.assignees && Array.isArray(task.assignees) && task.assignees.some(a => a.id === currentUserId))
+  
+  if (isAssignee) {
+    return { canEdit: true, canDelete: false, canView: true }
+  }
+  
+  // Check if user is a collaborator
+  const collaborator = task.collaborators?.find(c => c.id === currentUserId)
+  if (collaborator) {
+    const role = collaborator.role
+    return {
+      canEdit: ['OWNER', 'ADMIN', 'EDITOR'].includes(role),
+      canDelete: ['OWNER', 'ADMIN'].includes(role),
+      canView: true
+    }
+  }
+  
+  // Default: can only view
+  return { canEdit: false, canDelete: false, canView: true }
+}
+
+const canUserEditTask = (task) => {
+  return getUserTaskPermissions(task).canEdit
+}
+
+const canUserDeleteTask = (task) => {
+  return getUserTaskPermissions(task).canDelete
+}
+
 const getStatusClass = (status) => {
   const classes = {
     'PENDING': 'bg-yellow-100 text-yellow-800',
@@ -490,6 +551,16 @@ const getStatusClass = (status) => {
     'CANCELLED': 'bg-red-100 text-red-800'
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
+}
+
+const getStatusLabel = (status) => {
+  const labels = {
+    'PENDING': 'Pendente',
+    'IN_PROGRESS': 'Em Progresso', 
+    'COMPLETED': 'Concluída',
+    'CANCELLED': 'Cancelada'
+  }
+  return labels[status] || status
 }
 
 const getPriorityClass = (priority) => {
@@ -532,6 +603,18 @@ const formatDate = (date) => {
 }
 
 const updateTaskStatus = async (taskId, newStatus) => {
+  const task = tasksStore.tasks.find(t => t.id === taskId)
+  
+  if (!task) {
+    showToast('Tarefa não encontrada', 'error')
+    return
+  }
+
+  if (!canUserEditTask(task)) {
+    showToast('Você não tem permissão para editar esta tarefa', 'error')
+    return
+  }
+
   try {
     await tasksStore.updateTaskStatus(taskId, newStatus)
     showToast('Status atualizado com sucesso!', 'success')
@@ -541,6 +624,11 @@ const updateTaskStatus = async (taskId, newStatus) => {
 }
 
 const markAsCompleted = async (task) => {
+  if (!canUserEditTask(task)) {
+    showToast('Você não tem permissão para editar esta tarefa', 'error')
+    return
+  }
+  
   if (confirm('Marcar esta tarefa como concluída?')) {
     await updateTaskStatus(task.id, 'COMPLETED')
   }
@@ -579,8 +667,7 @@ const handleTaskSaved = async () => {
 
 const editTask = (task) => {
   // Check if user has permission to edit
-  const userPermissions = tasksStore.getUserPermissions(task.id, authStore.currentUser?.id)
-  if (!userPermissions.canEdit && task.assignee?.id !== authStore.currentUser?.id) {
+  if (!canUserEditTask(task)) {
     showToast('Você não tem permissão para editar esta tarefa', 'error')
     return
   }
@@ -589,8 +676,7 @@ const editTask = (task) => {
 
 const deleteTask = async (task) => {
   // Check if user has permission to delete
-  const userPermissions = tasksStore.getUserPermissions(task.id, authStore.currentUser?.id)
-  if (!userPermissions.canDelete && task.assignee?.id !== authStore.currentUser?.id) {
+  if (!canUserDeleteTask(task)) {
     showToast('Você não tem permissão para excluir esta tarefa', 'error')
     return
   }
@@ -606,17 +692,19 @@ const deleteTask = async (task) => {
 }
 
 const refreshTasks = async () => {
-  await tasksStore.fetchTasks()
+  await tasksStore.fetchMyTasks()
 }
 
 // Lifecycle
 onMounted(async () => {
   loading.value = true
+  
   try {
     await Promise.all([
-      tasksStore.fetchTasks(),
+      tasksStore.fetchMyTasks(),
       categoriesStore.fetchCategories()
     ])
+    
   } catch (error) {
     showToast('Erro ao carregar dados', 'error')
   } finally {
@@ -624,9 +712,14 @@ onMounted(async () => {
   }
 })
 
-// Watch filters for debounced search
-watch(() => filters.value.search, (newVal, oldVal) => {
-  // Debounce search
-  // Implementation can be added here
-})
+// Watch filters for real-time updates
+watch(filters, async (newFilters) => {
+  // Debounce search and other filters
+  clearTimeout(filterTimeout)
+  filterTimeout = setTimeout(async () => {
+    await tasksStore.fetchMyTasks(newFilters)
+  }, 300)
+}, { deep: true })
+
+let filterTimeout = null
 </script>

@@ -226,15 +226,23 @@ const showActions = ref(false)
 
 // Computed
 const userRole = computed(() => {
-  if (!props.task.collaborators) return null
-  
   const currentUser = authStore.currentUser
   if (!currentUser) return null
   
-  if (props.task.owner?.id === currentUser.id) return 'OWNER'
+  // Se o usuário é o proprietário da tarefa, sempre retorna OWNER
+  // Check both ownerId and owner.id for compatibility
+  const isOwner = props.task.owner?.id === currentUser.id || props.task.ownerId === currentUser.id
+  if (isOwner) {
+    return 'OWNER'
+  }
   
-  const collaboration = props.task.collaborators.find(c => c.id === currentUser.id)
-  return collaboration?.role || null
+  // Caso contrário, verifica na lista de colaboradores
+  if (props.task.collaborators) {
+    const collaboration = props.task.collaborators.find(c => c.id === currentUser.id)
+    return collaboration?.role || null
+  }
+  
+  return null
 })
 
 const canEdit = computed(() => {

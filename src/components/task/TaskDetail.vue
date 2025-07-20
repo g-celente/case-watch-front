@@ -182,9 +182,9 @@ import {
 import { useTasksStore } from '../../stores/tasks.js'
 import { useAuthStore } from '../../stores/auth/auth.js'
 import { useToast } from '../../composables/useToast.js'
-import CollaborationPanel from './CollaborationPanel.vue'
-import PermissionMatrix from './PermissionMatrix.vue'
-import BaseFormField from './ui/BaseFormField.vue'
+import CollaborationPanel from '../colaboration/CollaborationPanel.vue'
+import PermissionMatrix from '../colaboration/PermissionMatrix.vue'
+import BaseFormField from '../ui/BaseFormField.vue'
 
 const route = useRoute()
 const router = useRouter()
