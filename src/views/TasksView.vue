@@ -434,9 +434,9 @@ import CardContent from '../components/ui/CardContent.vue'
 import Button from '../components/ui/Button.vue'
 import BaseFormField from '../components/ui/BaseFormField.vue'
 import ConfirmDialog from '../components/ui/ConfirmDialog.vue'
-import TaskFormDialog from '../components/TaskFormDialog.vue'
-import TaskCard from '../components/TaskCard.vue'
-import TaskDetail from '../components/TaskDetail.vue'
+import TaskFormDialog from '../components/task/TaskFormDialog.vue'
+import TaskCard from '../components/task/TaskCard.vue'
+import TaskDetail from '../components/task/TaskDetail.vue'
 
 const tasksStore = useTasksStore()
 const categoriesStore = useCategoriesStore()

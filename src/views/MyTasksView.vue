@@ -397,10 +397,10 @@ import { useTasksStore } from '../stores/tasks.js'
 import { useCategoriesStore } from '../stores/categories.js'
 import { useAuthStore } from '../stores/auth/auth.js'
 import { useToast } from '../composables/useToast.js'
-import TaskCard from '../components/TaskCard.vue'
-import TaskDetailModal from '../components/TaskDetailModal.vue'
-import TaskFormDialog from '../components/TaskFormDialog.vue'
-import TaskQuickStatusModal from '../components/TaskQuickStatusModal.vue'
+import TaskCard from '../components/task/TaskCard.vue'
+import TaskDetailModal from '../components/task/TaskDetailModal.vue'
+import TaskFormDialog from '../components/task/TaskFormDialog.vue'
+import TaskQuickStatusModal from '../components/task/TaskQuickStatusModal.vue'
 
 const tasksStore = useTasksStore()
 const categoriesStore = useCategoriesStore()

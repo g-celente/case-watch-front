@@ -182,11 +182,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Plus, Users, Pin, X } from 'lucide-vue-next'
-import { useTasksStore } from '../stores/tasks.js'
-import { useAuthStore } from '../stores/auth/auth.js'
-import { useToast } from '../composables/useToast.js'
-import BaseDialog from './ui/BaseDialog.vue'
-import BaseFormField from './ui/BaseFormField.vue'
+import { useTasksStore } from '../../stores/tasks.js'
+import { useAuthStore } from '../../stores/auth/auth.js'
+import { useToast } from '../../composables/useToast.js'
+import BaseDialog from '../ui/BaseDialog.vue'
+import BaseFormField from '../ui/BaseFormField.vue'
 
 const props = defineProps({
   taskId: {

@@ -101,7 +101,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ChevronDown, X, Check } from 'lucide-vue-next'
-import { useAuthStore } from '../stores/auth/auth.js'
+import { useAuthStore } from '../../stores/auth/auth.js'
 
 const props = defineProps({
   label: {

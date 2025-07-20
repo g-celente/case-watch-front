@@ -249,14 +249,14 @@
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
-import { useTasksStore } from '../stores/tasks.js'
-import { useCategoriesStore } from '../stores/categories.js'
-import { useAuthStore } from '../stores/auth/auth.js'
+import { useTasksStore } from '../../stores/tasks.js'
+import { useCategoriesStore } from '../../stores/categories.js'
+import { useAuthStore } from '../../stores/auth/auth.js'
 import { AlertCircle, Users, X } from 'lucide-vue-next'
-import BaseDialog from './ui/BaseDialog.vue'
-import BaseFormField from './ui/BaseFormField.vue'
-import Button from './ui/Button.vue'
-import UserSearchCombobox from './UserSearchCombobox.vue'
+import BaseDialog from '../ui/BaseDialog.vue'
+import BaseFormField from '../ui/BaseFormField.vue'
+import Button from '../ui/Button.vue'
+import UserSearchCombobox from '../user/UserSearchCombobox.vue'
 
 const props = defineProps({
   isOpen: {

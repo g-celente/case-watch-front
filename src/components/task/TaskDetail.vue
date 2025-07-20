@@ -179,9 +179,9 @@ import {
   Tag, 
   Clock 
 } from 'lucide-vue-next'
-import { useTasksStore } from '../stores/tasks.js'
-import { useAuthStore } from '../stores/auth/auth.js'
-import { useToast } from '../composables/useToast.js'
+import { useTasksStore } from '../../stores/tasks.js'
+import { useAuthStore } from '../../stores/auth/auth.js'
+import { useToast } from '../../composables/useToast.js'
 import CollaborationPanel from './CollaborationPanel.vue'
 import PermissionMatrix from './PermissionMatrix.vue'
 import BaseFormField from './ui/BaseFormField.vue'

@@ -102,8 +102,8 @@ import {
   Play, 
   CheckSquare
 } from 'lucide-vue-next'
-import { useTasksStore } from '../stores/tasks.js'
-import { useToast } from '../composables/useToast.js'
+import { useTasksStore } from '../../stores/tasks.js'
+import { useToast } from '../../composables/useToast.js'
 
 const props = defineProps({
   isOpen: {

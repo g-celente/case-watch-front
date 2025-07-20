@@ -187,8 +187,8 @@ import {
   Tag, 
   Check 
 } from 'lucide-vue-next'
-import { useTasksStore } from '../stores/tasks.js'
-import { useAuthStore } from '../stores/auth/auth.js'
+import { useTasksStore } from '../../stores/tasks.js'
+import { useAuthStore } from '../../stores/auth/auth.js'
 
 // Click outside directive
 const vClickOutside = {

@@ -167,7 +167,7 @@ import CardContent from '../components/ui/CardContent.vue'
 import Button from '../components/ui/Button.vue'
 import BaseFormField from '../components/ui/BaseFormField.vue'
 import ConfirmDialog from '../components/ui/ConfirmDialog.vue'
-import CategoryFormDialog from '../components/CategoryFormDialog.vue'
+import CategoryFormDialog from '../components/category/CategoryFormDialog.vue'
 
 const categoriesStore = useCategoriesStore()
 const toast = useToast()

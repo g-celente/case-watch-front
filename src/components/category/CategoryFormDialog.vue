@@ -135,11 +135,11 @@
 
 <script setup>
 import { ref, reactive, watch } from 'vue'
-import { useCategoriesStore } from '../stores/categories.js'
+import { useCategoriesStore } from '../../stores/categories.js'
 import { AlertCircle } from 'lucide-vue-next'
-import BaseDialog from './ui/BaseDialog.vue'
-import BaseFormField from './ui/BaseFormField.vue'
-import Button from './ui/Button.vue'
+import BaseDialog from '../ui/BaseDialog.vue'
+import BaseFormField from '../ui/BaseFormField.vue'
+import Button from '../ui/Button.vue'
 
 const props = defineProps({
   isOpen: {
