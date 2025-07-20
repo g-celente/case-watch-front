@@ -399,6 +399,52 @@ export const useTasksStore = defineStore('tasks', () => {
         }
     }
 
+    const getUserPermissions = (taskId, userId) => {
+        const task = tasks.value.find(t => t.id === taskId)
+        if (!task || !userId) {
+            return {
+                canEdit: false,
+                canDelete: false,
+                canManageCollaborators: false,
+                canAssign: false,
+                currentUserRole: 'VIEWER'
+            }
+        }
+
+        // If user is the assignee, they can edit
+        if (task.assignee?.id === userId) {
+            return {
+                canEdit: true,
+                canDelete: false,
+                canManageCollaborators: false,
+                canAssign: false,
+                currentUserRole: 'ASSIGNEE'
+            }
+        }
+
+        // Check collaborator role
+        const collaborator = task.collaborators?.find(c => c.id === userId)
+        if (collaborator) {
+            const role = collaborator.role
+            return {
+                canEdit: ['OWNER', 'ADMIN', 'EDITOR'].includes(role),
+                canDelete: ['OWNER', 'ADMIN'].includes(role),
+                canManageCollaborators: ['OWNER', 'ADMIN'].includes(role),
+                canAssign: ['OWNER', 'ADMIN'].includes(role),
+                currentUserRole: role
+            }
+        }
+
+        // Default permissions for non-collaborators
+        return {
+            canEdit: false,
+            canDelete: false,
+            canManageCollaborators: false,
+            canAssign: false,
+            currentUserRole: 'VIEWER'
+        }
+    }
+
     const setCurrentTask = (task) => {
         currentTask.value = task
         if (task) {
@@ -445,6 +491,7 @@ export const useTasksStore = defineStore('tasks', () => {
         assignTask,
         unassignTask,
         calculateUserPermissions,
+        getUserPermissions,
         setCurrentTask
     }
 })

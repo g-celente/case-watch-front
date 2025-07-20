@@ -1,5 +1,8 @@
 <template>
-  <div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+  <div 
+    @click="$emit('view', task)"
+    class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow"
+  >
     <!-- Header -->
     <div class="flex items-start justify-between mb-4">
       <div class="flex-1">
@@ -10,7 +13,7 @@
       <!-- Actions Dropdown -->
       <div class="relative" v-if="canEdit || canDelete">
         <button
-          @click="showActions = !showActions"
+          @click.stop="showActions = !showActions"
           class="p-1 rounded-full hover:bg-gray-100"
         >
           <MoreVertical class="h-5 w-5 text-gray-400" />
@@ -23,7 +26,7 @@
         >
           <button
             v-if="canEdit"
-            @click="$emit('edit', task)"
+            @click.stop="$emit('edit', task)"
             class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
           >
             <Edit class="h-4 w-4 inline mr-2" />
@@ -31,7 +34,7 @@
           </button>
           <button
             v-if="canDelete"
-            @click="$emit('delete', task)"
+            @click.stop="$emit('delete', task)"
             class="w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
           >
             <Trash2 class="h-4 w-4 inline mr-2" />
@@ -122,6 +125,7 @@
           v-if="canEdit"
           :value="task.status"
           @change="handleStatusUpdate($event.target.value)"
+          @click.stop
           class="text-xs border-0 bg-transparent focus:ring-0 text-gray-600"
         >
           <option value="PENDING">Pendente</option>
@@ -135,6 +139,7 @@
           v-if="canEdit"
           :value="task.priority"
           @change="handlePriorityUpdate($event.target.value)"
+          @click.stop
           class="text-xs border-0 bg-transparent focus:ring-0 text-gray-600"
         >
           <option value="LOW">Baixa</option>
@@ -184,6 +189,21 @@ import {
 } from 'lucide-vue-next'
 import { useTasksStore } from '../stores/tasks.js'
 import { useAuthStore } from '../stores/auth/auth.js'
+
+// Click outside directive
+const vClickOutside = {
+  beforeMount(el, binding) {
+    el.clickOutsideEvent = (event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value()
+      }
+    }
+    document.addEventListener('click', el.clickOutsideEvent)
+  },
+  unmounted(el) {
+    document.removeEventListener('click', el.clickOutsideEvent)
+  }
+}
 
 const props = defineProps({
   task: {
@@ -365,21 +385,6 @@ const handlePriorityUpdate = async (newPriority) => {
     await tasksStore.updateTaskPriority(props.task.id, newPriority)
   } catch (error) {
     console.error('Erro ao atualizar prioridade:', error)
-  }
-}
-
-// Click outside directive
-const clickOutside = {
-  beforeMount(el, binding) {
-    el.clickOutsideEvent = (event) => {
-      if (!(el === event.target || el.contains(event.target))) {
-        binding.value()
-      }
-    }
-    document.addEventListener('click', el.clickOutsideEvent)
-  },
-  unmounted(el) {
-    document.removeEventListener('click', el.clickOutsideEvent)
   }
 }
 </script>

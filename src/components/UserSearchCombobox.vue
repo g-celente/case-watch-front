@@ -26,7 +26,7 @@
     </div>
 
     <!-- Selected Users Preview -->
-    <div v-if="selectedUsers.length > 0" class="mt-3 flex flex-wrap gap-2">
+    <div v-if="selectedUsers && selectedUsers.length > 0" class="mt-3 flex flex-wrap gap-2">
       <div
         v-for="user in selectedUsers"
         :key="user.id"
@@ -144,8 +144,8 @@ const inputRef = ref(null)
 
 // Computed
 const selectedUsers = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
+  get: () => props.modelValue || [],
+  set: (value) => emit('update:modelValue', value || [])
 })
 
 const availableUsers = computed(() => authStore.availableUsers || [])

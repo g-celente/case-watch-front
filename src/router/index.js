@@ -48,6 +48,12 @@ const routes = [
         meta: { title: 'Tarefas' }
       },
       {
+        path: 'my-tasks',
+        name: 'my-tasks',
+        component: () => import('../views/MyTasksView.vue'),
+        meta: { title: 'Minhas Tarefas' }
+      },
+      {
         path: 'categories',
         name: 'categories', // Alterado para minúsculo
         component: () => import('../views/CategoriesView.vue'),

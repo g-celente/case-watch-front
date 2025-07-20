@@ -65,7 +65,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth/auth.js'
-import { CheckSquare, LayoutDashboard, CheckCircle, FolderOpen, Users, BarChart3, User, LogOut } from 'lucide-vue-next'
+import { CheckSquare, LayoutDashboard, CheckCircle, FolderOpen, Users, BarChart3, User, LogOut, UserCheck } from 'lucide-vue-next'
 
 defineProps({
   isOpen: {
@@ -92,19 +92,14 @@ const navigationItems = [
     icon: LayoutDashboard
   },
   {
-    name: 'Tarefas',
-    path: '/tasks',
-    icon: CheckCircle
+    name: 'Minhas Tarefas',
+    path: '/my-tasks',
+    icon: UserCheck
   },
   {
     name: 'Categorias',
     path: '/categories',
     icon: FolderOpen
-  },
-  {
-    name: 'Usuários',
-    path: '/users',
-    icon: Users
   },
   {
     name: 'Relatórios',

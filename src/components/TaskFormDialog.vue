@@ -251,10 +251,12 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { useTasksStore } from '../stores/tasks.js'
 import { useCategoriesStore } from '../stores/categories.js'
-import { AlertCircle } from 'lucide-vue-next'
+import { useAuthStore } from '../stores/auth/auth.js'
+import { AlertCircle, Users, X } from 'lucide-vue-next'
 import BaseDialog from './ui/BaseDialog.vue'
 import BaseFormField from './ui/BaseFormField.vue'
 import Button from './ui/Button.vue'
+import UserSearchCombobox from './UserSearchCombobox.vue'
 
 const props = defineProps({
   isOpen: {
@@ -271,15 +273,21 @@ const emit = defineEmits(['close', 'saved'])
 
 const tasksStore = useTasksStore()
 const categoriesStore = useCategoriesStore()
+const authStore = useAuthStore()
 
 const loading = ref(false)
 const submitError = ref('')
+
+// Collaboration state
+const selectedAssignee = ref(null)
+const selectedCollaborators = ref([])
+const collaborationPreview = ref([])
 
 const form = reactive({
   title: '',
   description: '',
   priority: '',
-  status: 'pending',
+  status: 'PENDING',
   categoryId: '',
   dueDate: ''
 })
@@ -293,13 +301,25 @@ const errors = reactive({
   dueDate: ''
 })
 
+// Computed
+const getExcludedUsers = computed(() => {
+  const excluded = []
+  if (selectedAssignee.value) {
+    excluded.push(selectedAssignee.value.id)
+  }
+  if (authStore.currentUser) {
+    excluded.push(authStore.currentUser.id)
+  }
+  return excluded
+})
+
 // Reset form and errors
 const resetForm = () => {
   Object.assign(form, {
     title: '',
     description: '',
     priority: '',
-    status: 'pending',
+    status: 'PENDING',
     categoryId: '',
     dueDate: ''
   })
@@ -313,6 +333,10 @@ const resetForm = () => {
     dueDate: ''
   })
   
+  // Reset collaboration
+  selectedAssignee.value = null
+  selectedCollaborators.value = []
+  collaborationPreview.value = []
   submitError.value = ''
 }
 
@@ -322,7 +346,7 @@ const populateForm = () => {
     form.title = props.task.title || ''
     form.description = props.task.description || ''
     form.priority = props.task.priority || ''
-    form.status = props.task.status || 'pending'
+    form.status = props.task.status || 'PENDING'
     form.categoryId = props.task.categoryId || ''
     
     // Format date for datetime-local input
@@ -336,6 +360,20 @@ const populateForm = () => {
       form.dueDate = `${year}-${month}-${day}T${hours}:${minutes}`
     } else {
       form.dueDate = ''
+    }
+    
+    // Populate collaboration data
+    if (props.task.assignee) {
+      selectedAssignee.value = props.task.assignee
+    }
+    
+    if (props.task.collaborators) {
+      const collabs = props.task.collaborators.filter(c => c.role !== 'OWNER')
+      selectedCollaborators.value = collabs.map(c => ({ id: c.id, name: c.name, email: c.email }))
+      collaborationPreview.value = collabs.map(c => ({
+        user: { id: c.id, name: c.name, email: c.email },
+        role: c.role
+      }))
     }
   }
 }
@@ -391,6 +429,47 @@ const validateForm = () => {
   return isValid
 }
 
+// Collaboration functions
+const getInitials = (name) => {
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+const handleAssigneeChange = (assignee) => {
+  selectedAssignee.value = assignee
+}
+
+const handleCollaboratorsChange = (collaborators) => {
+  selectedCollaborators.value = collaborators
+  updateCollaborationPreview()
+}
+
+const updateCollaborationPreview = () => {
+  collaborationPreview.value = selectedCollaborators.value.map(user => {
+    const existing = collaborationPreview.value.find(c => c.user.id === user.id)
+    return {
+      user,
+      role: existing?.role || 'VIEWER'
+    }
+  })
+}
+
+const updateCollaboratorRole = (userId, role) => {
+  const collaboration = collaborationPreview.value.find(c => c.user.id === userId)
+  if (collaboration) {
+    collaboration.role = role
+  }
+}
+
+const removeCollaborator = (userId) => {
+  selectedCollaborators.value = selectedCollaborators.value.filter(u => u.id !== userId)
+  collaborationPreview.value = collaborationPreview.value.filter(c => c.user.id !== userId)
+}
+
 // Submit form
 const handleSubmit = async () => {
   if (!validateForm()) {
@@ -407,7 +486,12 @@ const handleSubmit = async () => {
       priority: form.priority,
       status: form.status,
       categoryId: form.categoryId || null,
-      dueDate: form.dueDate ? new Date(form.dueDate).toISOString() : null
+      dueDate: form.dueDate ? new Date(form.dueDate).toISOString() : null,
+      assigneeId: selectedAssignee.value?.id || null,
+      collaborators: collaborationPreview.value.map(c => ({
+        userId: c.user.id,
+        role: c.role
+      }))
     }
 
     if (props.task) {
