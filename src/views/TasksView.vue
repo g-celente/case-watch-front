@@ -33,19 +33,19 @@
                     <select v-model="filters.status" @change="handleFilterChange"
                         class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500">
                         <option value="">Todos os status</option>
-                        <option value="pending">Pendente</option>
-                        <option value="in_progress">Em Andamento</option>
-                        <option value="completed">Concluída</option>
-                        <option value="cancelled">Cancelada</option>
+                        <option value="PENDING">Pendente</option>
+                        <option value="IN_PROGRESS">Em Andamento</option>
+                        <option value="COMPLETED">Concluída</option>
+                        <option value="CANCELLED">Cancelada</option>
                     </select>
 
                     <select v-model="filters.priority" @change="handleFilterChange"
                         class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500">
                         <option value="">Todas as prioridades</option>
-                        <option value="low">Baixa</option>
-                        <option value="medium">Média</option>
-                        <option value="high">Alta</option>
-                        <option value="urgent">Urgente</option>
+                        <option value="LOW">Baixa</option>
+                        <option value="MEDIUM">Média</option>
+                        <option value="HIGH">Alta</option>
+                        <option value="URGENT">Urgente</option>
                     </select>
 
                     <select v-model="filters.categoryId" @change="handleFilterChange"

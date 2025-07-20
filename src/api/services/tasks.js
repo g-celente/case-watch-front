@@ -1,7 +1,7 @@
 export default (httpClient) => ({
   // Listar tarefas 
   getTasks: (params = {}) => {
-    return httpClient.get('/tasks')
+    return httpClient.get('/tasks', {params})
   },
   // Buscar tarefa por ID
   getTask: (id) => {
@@ -45,7 +45,7 @@ export default (httpClient) => ({
   },
   // Minhas tarefas
   getMyTasks: (params = {}) => {
-    return httpClient.get('/tasks/my')
+    return httpClient.get('/tasks/my', {params})
   },
   // Tarefas por status
   getTasksByStatus: (status) => {
@@ -57,7 +57,7 @@ export default (httpClient) => ({
   },
   // Buscar tarefas
   searchTasks: (params = {}) => {
-    return httpClient.get('/tasks/search')
+    return httpClient.get('/tasks/search', {params})
   },
   // Estatísticas
   getStats: () => {
