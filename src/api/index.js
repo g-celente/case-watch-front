@@ -1,8 +1,10 @@
 import axios from "axios";
 import AuthService from "./services/auth";
+import CategorieService from "./services/categories";
+import TaskService from "./services/tasks";
 // Import AdminService if needed
 
-const baseURL ="http://localhost:3056/api"; // Use your actual API base URL here
+const baseURL ="http://localhost:3056/api/"; // Use your actual API base URL here
 
 const httpClient = axios.create({ baseURL });
 
@@ -72,5 +74,7 @@ httpClient.interceptors.response.use(
 );
 
 export default {
-  auth: AuthService(httpClient)
+  auth: AuthService(httpClient),
+  categories: CategorieService(httpClient),
+  tasks: TaskService(httpClient),
 };

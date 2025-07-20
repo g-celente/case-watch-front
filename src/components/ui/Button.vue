@@ -1,9 +1,10 @@
 <template>
   <button
     :class="cn(buttonVariants({ variant, size }), $attrs.class)"
-    :disabled="disabled"
+    :disabled="disabled || loading"
     v-bind="$attrs"
   >
+    <div v-if="loading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
     <slot />
   </button>
 </template>
@@ -17,7 +18,7 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'default',
-    validator: (value) => ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'].includes(value)
+    validator: (value) => ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link', 'warning'].includes(value)
   },
   size: {
     type: String,
@@ -27,20 +28,25 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  loading: {
+    type: Boolean,
+    default: false
   }
 })
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
-        link: 'text-primary underline-offset-4 hover:underline'
+        default: 'bg-purple-600 text-white hover:bg-purple-700',
+        destructive: 'bg-red-600 text-white hover:bg-red-700',
+        outline: 'border border-gray-300 bg-white hover:bg-gray-50 text-gray-900',
+        secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200',
+        ghost: 'hover:bg-gray-100 text-gray-900',
+        link: 'text-purple-600 underline-offset-4 hover:underline',
+        warning: 'bg-yellow-600 text-white hover:bg-yellow-700'
       },
       size: {
         default: 'h-10 px-4 py-2',

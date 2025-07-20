@@ -3,7 +3,7 @@
     <div class="h-full px-3 py-4 overflow-y-auto">
       <!-- Logo -->
       <div class="flex items-center mb-8 px-3">
-        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mr-3">
+        <div class="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
           <CheckSquare class="w-5 h-5 text-white" />
         </div>
         <span class="text-xl font-semibold text-gray-900">TaskManager</span>
@@ -18,7 +18,7 @@
           class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors"
           :class="[
             $route.path === item.path
-              ? 'bg-primary text-white'
+              ? 'bg-purple-600 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           ]"
         >
