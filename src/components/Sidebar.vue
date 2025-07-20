@@ -105,7 +105,7 @@ const navigationItems = [
     name: 'Relatórios',
     path: '/reports',
     icon: BarChart3
-  }
+  },
 ]
 
 const handleLogout = async () => {

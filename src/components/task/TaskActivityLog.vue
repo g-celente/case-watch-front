@@ -159,6 +159,9 @@ import {
   PinOff,
   Settings
 } from 'lucide-vue-next'
+import { useTasksStore } from '../../stores/tasks.js'
+
+const tasksStore = useTasksStore()
 
 const props = defineProps({
   taskId: {
@@ -173,71 +176,6 @@ const loading = ref(false)
 const selectedFilter = ref('all')
 const page = ref(1)
 const hasMore = ref(true)
-
-// Mock activities data
-const mockActivities = [
-  {
-    id: '1',
-    type: 'task',
-    action: 'created',
-    user: { id: '1', name: 'João Silva', email: 'joao@email.com' },
-    description: 'Tarefa criada',
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    changes: null,
-    metadata: null
-  },
-  {
-    id: '2',
-    type: 'collaboration',
-    action: 'added',
-    user: { id: '1', name: 'João Silva', email: 'joao@email.com' },
-    description: 'Adicionou Maria Santos como colaboradora',
-    createdAt: new Date(Date.now() - 1.5 * 60 * 60 * 1000).toISOString(),
-    changes: null,
-    metadata: { 
-      collaborator: { id: '2', name: 'Maria Santos' },
-      role: 'EDITOR'
-    }
-  },
-  {
-    id: '3',
-    type: 'assignment',
-    action: 'assigned',
-    user: { id: '1', name: 'João Silva', email: 'joao@email.com' },
-    description: 'Atribuiu a tarefa para Maria Santos',
-    createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-    changes: null,
-    metadata: { 
-      assignee: { id: '2', name: 'Maria Santos' }
-    }
-  },
-  {
-    id: '4',
-    type: 'task',
-    action: 'updated',
-    user: { id: '2', name: 'Maria Santos', email: 'maria@email.com' },
-    description: 'Atualizou a tarefa',
-    createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    changes: {
-      status: { from: 'PENDING', to: 'IN_PROGRESS' },
-      priority: { from: 'MEDIUM', to: 'HIGH' }
-    },
-    metadata: null
-  },
-  {
-    id: '5',
-    type: 'collaboration',
-    action: 'added',
-    user: { id: '2', name: 'Maria Santos', email: 'maria@email.com' },
-    description: 'Adicionou Pedro Costa como colaborador',
-    createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-    changes: null,
-    metadata: { 
-      collaborator: { id: '3', name: 'Pedro Costa' },
-      role: 'VIEWER'
-    }
-  }
-]
 
 // Computed
 const filteredActivities = computed(() => {
@@ -419,28 +357,50 @@ const filterActivities = () => {
 }
 
 const refreshActivities = async () => {
+  if (!props.taskId) return
+  
   loading.value = true
-  // Simulate API call
-  setTimeout(() => {
-    activities.value = [...mockActivities]
+  try {
+    // Fetch activities from real API
+    const response = await tasksStore.fetchTaskActivities(props.taskId, {
+      page: 1,
+      filter: selectedFilter.value
+    })
+    activities.value = response.data || []
+    hasMore.value = response.hasMore || false
+  } catch (error) {
+    console.error('Erro ao carregar atividades:', error)
+    activities.value = []
+  } finally {
     loading.value = false
-  }, 500)
+  }
 }
 
 const loadMoreActivities = async () => {
-  loading.value = true
-  page.value += 1
+  if (!props.taskId || !hasMore.value) return
   
-  // Simulate API call for more data
-  setTimeout(() => {
-    // In real implementation, would append new activities
-    hasMore.value = false // No more data for demo
+  loading.value = true
+  try {
+    const response = await tasksStore.fetchTaskActivities(props.taskId, {
+      page: page.value + 1,
+      filter: selectedFilter.value
+    })
+    if (response.data && response.data.length > 0) {
+      activities.value.push(...response.data)
+      page.value += 1
+      hasMore.value = response.hasMore || false
+    } else {
+      hasMore.value = false
+    }
+  } catch (error) {
+    console.error('Erro ao carregar mais atividades:', error)
+  } finally {
     loading.value = false
-  }, 500)
+  }
 }
 
 // Lifecycle
 onMounted(() => {
-  activities.value = [...mockActivities]
+  refreshActivities()
 })
 </script>

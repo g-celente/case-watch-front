@@ -4,7 +4,7 @@ import api from '../../api/index.js'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
-  const user = ref(null)
+  const user = ref(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null)
   const token = ref(localStorage.getItem('token'))
   const error = ref(null)
   const isLoading = ref(false)

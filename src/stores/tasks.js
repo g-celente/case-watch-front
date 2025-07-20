@@ -53,6 +53,8 @@ export const useTasksStore = defineStore('tasks', () => {
         overdue: overdueTasks.value.length
     }))
 
+    const myTasks = computed(() => tasks.value)
+
     // Actions
     const fetchTasks = async (params = {}) => {
         try {
@@ -510,6 +512,31 @@ export const useTasksStore = defineStore('tasks', () => {
         }
     }
 
+    const fetchTaskActivities = async (taskId, options = {}) => {
+        try {
+            const params = {
+                page: options.page || 1,
+                limit: options.limit || 20,
+                filter: options.filter || 'all'
+            }
+            
+            const response = await api.get(`/tasks/${taskId}/activities`, { params })
+            return {
+                data: response.data.activities || [],
+                hasMore: response.data.hasMore || false,
+                total: response.data.total || 0
+            }
+        } catch (err) {
+            console.error('Erro ao buscar atividades da tarefa:', err)
+            // Return empty response on error
+            return {
+                data: [],
+                hasMore: false,
+                total: 0
+            }
+        }
+    }
+
     return {
         // State
         tasks,
@@ -523,6 +550,7 @@ export const useTasksStore = defineStore('tasks', () => {
         assignee,
 
         // Getters
+        myTasks,
         pendingTasks,
         inProgressTasks,
         completedTasks,
@@ -549,6 +577,7 @@ export const useTasksStore = defineStore('tasks', () => {
         unassignTask,
         calculateUserPermissions,
         getUserPermissions,
-        setCurrentTask
+        setCurrentTask,
+        fetchTaskActivities
     }
 })

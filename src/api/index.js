@@ -2,6 +2,7 @@ import axios from "axios";
 import AuthService from "./services/auth";
 import CategorieService from "./services/categories";
 import TaskService from "./services/tasks";
+import ReportsService from "./services/reports";
 // Import AdminService if needed
 
 const baseURL ="http://localhost:3056/api/"; // Use your actual API base URL here
@@ -77,4 +78,5 @@ export default {
   auth: AuthService(httpClient),
   categories: CategorieService(httpClient),
   tasks: TaskService(httpClient),
+  reports: ReportsService(httpClient),
 };

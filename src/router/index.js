@@ -72,6 +72,12 @@ const routes = [
         meta: { title: 'Relatórios' }
       },
       {
+        path: 'reports-dashboard',
+        name: 'ReportsDashboard',
+        component: () => import('../views/ReportsDashboard.vue'),
+        meta: { title: 'Dashboard de Relatórios' }
+      },
+      {
         path: 'profile',
         name: 'Profile',
         component: () => import('../views/ProfileView.vue'),
