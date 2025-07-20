@@ -156,17 +156,40 @@
                             {{ tasksStore.tasks.length }} tarefa(s) encontrada(s)
                         </CardDescription>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <select v-model="filters.sortBy" @change="handleFilterChange"
-                            class="text-sm rounded-md border border-gray-300 px-3 py-1 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500">
-                            <option value="createdAt">Data de Criação</option>
-                            <option value="dueDate">Data de Vencimento</option>
-                            <option value="title">Título</option>
-                            <option value="priority">Prioridade</option>
-                        </select>
-                        <Button variant="outline" size="sm" @click="toggleSortOrder">
-                            <component :is="filters.sortOrder === 'asc' ? ArrowUp : ArrowDown" class="w-4 h-4" />
-                        </Button>
+                    <div class="flex items-center space-x-4">
+                        <!-- View Mode Toggle -->
+                        <div class="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                :class="viewMode === 'table' ? 'bg-white shadow-sm' : ''"
+                                @click="viewMode = 'table'"
+                            >
+                                <List class="w-4 h-4" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                :class="viewMode === 'cards' ? 'bg-white shadow-sm' : ''"
+                                @click="viewMode = 'cards'"
+                            >
+                                <Grid class="w-4 h-4" />
+                            </Button>
+                        </div>
+                        
+                        <!-- Sort Controls -->
+                        <div class="flex items-center space-x-2">
+                            <select v-model="filters.sortBy" @change="handleFilterChange"
+                                class="text-sm rounded-md border border-gray-300 px-3 py-1 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500">
+                                <option value="createdAt">Data de Criação</option>
+                                <option value="dueDate">Data de Vencimento</option>
+                                <option value="title">Título</option>
+                                <option value="priority">Prioridade</option>
+                            </select>
+                            <Button variant="outline" size="sm" @click="toggleSortOrder">
+                                <component :is="filters.sortOrder === 'asc' ? ArrowUp : ArrowDown" class="w-4 h-4" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </CardHeader>
@@ -191,7 +214,7 @@
                 </div>
 
                 <!-- Tasks Table -->
-                <div v-else class="overflow-hidden">
+                <div v-if="viewMode === 'table'" class="overflow-hidden">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
@@ -213,6 +236,10 @@
                                 </th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Colaboradores
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Vencimento
                                 </th>
                                 <th
@@ -223,7 +250,8 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr v-for="task in tasksStore.tasks" :key="task.id"
-                                class="hover:bg-gray-50 transition-colors">
+                                class="hover:bg-gray-50 transition-colors cursor-pointer"
+                                @click="openTaskDetail(task)">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
                                         <div class="w-3 h-3 rounded-full mr-3" :class="getStatusColor(task.status)">
@@ -241,6 +269,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <select :value="task.status"
                                         @change="updateTaskStatus(task.id, $event.target.value)"
+                                        @click.stop
                                         class="text-xs rounded-full px-2 py-1 font-semibold border-0 focus:ring-2 focus:ring-purple-500"
                                         :class="getStatusBadgeClass(task.status)">
                                         <option value="PENDING">Pendente</option>
@@ -252,6 +281,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <select :value="task.priority"
                                         @change="updateTaskPriority(task.id, $event.target.value)"
+                                        @click.stop
                                         class="text-xs rounded-full px-2 py-1 font-semibold border-0 focus:ring-2 focus:ring-purple-500"
                                         :class="getPriorityBadgeClass(task.priority)">
                                         <option value="LOW">Baixa</option>
@@ -268,15 +298,41 @@
                                     </span>
                                     <span v-else class="text-gray-400 text-sm">Sem categoria</span>
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex -space-x-2">
+                                        <div
+                                            v-for="(collaborator, index) in task.collaborators?.slice(0, 3)"
+                                            :key="collaborator.id"
+                                            class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xs font-medium border-2 border-white"
+                                            :title="`${collaborator.name} (${collaborator.role})`"
+                                        >
+                                            {{ collaborator.name?.charAt(0)?.toUpperCase() }}
+                                        </div>
+                                        <div
+                                            v-if="task.collaborators?.length > 3"
+                                            class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-xs font-medium border-2 border-white"
+                                            :title="`+${task.collaborators.length - 3} colaboradores`"
+                                        >
+                                            +{{ task.collaborators.length - 3 }}
+                                        </div>
+                                        <div
+                                            v-if="!task.collaborators?.length"
+                                            class="text-gray-400 text-sm flex items-center"
+                                        >
+                                            <Users class="w-4 h-4 mr-1" />
+                                            Sem colaboradores
+                                        </div>
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ formatDate(task.dueDate) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end space-x-2">
-                                        <Button variant="ghost" size="sm" @click="editTask(task)">
+                                        <Button variant="ghost" size="sm" @click.stop="editTask(task)">
                                             <Edit2 class="w-4 h-4" />
                                         </Button>
-                                        <Button variant="ghost" size="sm" @click="confirmDeleteTask(task)"
+                                        <Button variant="ghost" size="sm" @click.stop="confirmDeleteTask(task)"
                                             class="text-red-600 hover:text-red-700">
                                             <Trash2 class="w-4 h-4" />
                                         </Button>
@@ -285,6 +341,20 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Tasks Cards -->
+                <div v-else-if="viewMode === 'cards'" class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <TaskCard
+                            v-for="task in tasksStore.tasks"
+                            :key="task.id"
+                            :task="task"
+                            @edit="editTask"
+                            @delete="confirmDeleteTask"
+                            @click="openTaskDetail"
+                        />
+                    </div>
                 </div>
             </CardContent>
         </Card>
@@ -315,6 +385,15 @@
     <!-- Task Form Dialog -->
     <TaskFormDialog :is-open="showTaskDialog" :task="selectedTask" @close="closeTaskDialog" @saved="handleTaskSaved" />
 
+    <!-- Task Detail Dialog -->
+    <TaskDetail
+        v-if="showTaskDetail && selectedTask"
+        :task="selectedTask"
+        :is-open="showTaskDetail"
+        @close="closeTaskDetail"
+        @updated="handleTaskUpdated"
+    />
+
     <!-- Confirm Delete Dialog -->
     <ConfirmDialog :is-open="showDeleteDialog" type="danger" title="Excluir Tarefa"
         :message="`Tem certeza que deseja excluir a tarefa '${taskToDelete?.title}'? Esta ação não pode ser desfeita.`"
@@ -340,7 +419,10 @@ import {
     ArrowUp,
     ArrowDown,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Grid,
+    List,
+    Users
 } from 'lucide-vue-next'
 
 // Components
@@ -353,6 +435,8 @@ import Button from '../components/ui/Button.vue'
 import BaseFormField from '../components/ui/BaseFormField.vue'
 import ConfirmDialog from '../components/ui/ConfirmDialog.vue'
 import TaskFormDialog from '../components/TaskFormDialog.vue'
+import TaskCard from '../components/TaskCard.vue'
+import TaskDetail from '../components/TaskDetail.vue'
 
 const tasksStore = useTasksStore()
 const categoriesStore = useCategoriesStore()
@@ -361,9 +445,13 @@ const toast = useToast()
 // Dialog states
 const showTaskDialog = ref(false)
 const showDeleteDialog = ref(false)
+const showTaskDetail = ref(false)
 const selectedTask = ref(null)
 const taskToDelete = ref(null)
 const deleteLoading = ref(false)
+
+// View mode state
+const viewMode = ref('table') // 'table' or 'cards'
 
 // Filters
 const filters = ref({
@@ -427,6 +515,23 @@ const openCreateDialog = () => {
 const editTask = (task) => {
     selectedTask.value = task
     showTaskDialog.value = true
+}
+
+const openTaskDetail = (task) => {
+    selectedTask.value = task
+    tasksStore.setCurrentTask(task)
+    showTaskDetail.value = true
+}
+
+const closeTaskDetail = () => {
+    showTaskDetail.value = false
+    selectedTask.value = null
+    tasksStore.setCurrentTask(null)
+}
+
+const handleTaskUpdated = () => {
+    tasksStore.fetchTasks()
+    toast.success('Tarefa atualizada com sucesso!')
 }
 
 const closeTaskDialog = () => {

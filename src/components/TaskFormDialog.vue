@@ -123,6 +123,93 @@
         />
       </div>
 
+      <!-- Assignment & Collaboration Section -->
+      <div class="border-t border-gray-200 pt-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+          <Users class="h-5 w-5 mr-2 text-purple-600" />
+          Atribuição e Colaboração
+        </h3>
+        
+        <div class="space-y-4">
+          <!-- Assignee -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Responsável (Assignee)
+            </label>
+            <UserSearchCombobox
+              v-model="selectedAssignee"
+              :multiple="false"
+              placeholder="Selecionar responsável..."
+              :exclude="[authStore.currentUser?.id]"
+              @change="handleAssigneeChange"
+            />
+            <p class="mt-1 text-xs text-gray-500">
+              O responsável será notificado e terá a tarefa em sua lista pessoal
+            </p>
+          </div>
+
+          <!-- Collaborators -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Colaboradores
+            </label>
+            <UserSearchCombobox
+              v-model="selectedCollaborators"
+              :multiple="true"
+              placeholder="Adicionar colaboradores..."
+              :exclude="getExcludedUsers"
+              @change="handleCollaboratorsChange"
+            />
+            
+            <!-- Collaboration Preview -->
+            <div v-if="collaborationPreview.length > 0" class="mt-3">
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Preview da Equipe:</h4>
+              <div class="space-y-2">
+                <div
+                  v-for="collab in collaborationPreview"
+                  :key="collab.user.id"
+                  class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
+                >
+                  <div class="flex items-center">
+                    <div class="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center text-white text-sm font-medium mr-3">
+                      {{ getInitials(collab.user.name) }}
+                    </div>
+                    <div>
+                      <div class="text-sm font-medium text-gray-900">{{ collab.user.name }}</div>
+                      <div class="text-xs text-gray-500">{{ collab.user.email }}</div>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center space-x-2">
+                    <select
+                      v-model="collab.role"
+                      @change="updateCollaboratorRole(collab.user.id, collab.role)"
+                      class="text-xs border-gray-300 rounded focus:ring-purple-500 focus:border-purple-500"
+                    >
+                      <option value="VIEWER">👁️ Visualizador</option>
+                      <option value="EDITOR">✏️ Editor</option>
+                      <option value="ADMIN">⚙️ Administrador</option>
+                    </select>
+                    
+                    <button
+                      @click="removeCollaborator(collab.user.id)"
+                      type="button"
+                      class="text-red-600 hover:text-red-700"
+                    >
+                      <X class="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <p class="mt-1 text-xs text-gray-500">
+              Colaboradores terão acesso à tarefa baseado no nível de permissão selecionado
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- Error Alert -->
       <div v-if="submitError" class="rounded-md bg-red-50 p-4">
         <div class="flex">

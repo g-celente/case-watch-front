@@ -1,17 +1,31 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import api from '../../api/index.js'
 
 export const useAuthStore = defineStore('auth', () => {
-
+  // State
+  const user = ref(null)
+  const token = ref(localStorage.getItem('token'))
   const error = ref(null)
   const isLoading = ref(false)
+  const availableUsers = ref([])
+
+  // Getters
+  const isAuthenticated = computed(() => !!token.value)
+  const currentUser = computed(() => user.value)
 
   const login = async (credentials) => {
     try {
       isLoading.value = true
       error.value = null
       const response = await api.auth.login(credentials)
+      
+      if (response.data.success) {
+        token.value = response.data.data.token
+        user.value = response.data.data.user
+        localStorage.setItem('token', token.value)
+      }
+      
       return response.data
     } catch (err) {
       error.value = err.response?.data?.message || 'Erro ao fazer login'
@@ -23,6 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const register = async (userData) => {
     try {
+      isLoading.value = true
       error.value = null
       const response = await api.auth.register(userData)
 
@@ -44,6 +59,28 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('Erro ao fazer logout:', err)
     } finally {
       clearAuth()
+    }
+  }
+
+  const clearAuth = () => {
+    user.value = null
+    token.value = null
+    localStorage.removeItem('token')
+  }
+
+  const fetchUsers = async () => {
+    try {
+      error.value = null
+      const response = await api.auth.getUsers()
+      
+      if (response.data.success) {
+        availableUsers.value = response.data.data.users || response.data.data
+      }
+      
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erro ao buscar usuários'
+      throw err
     }
   }
 
@@ -85,11 +122,21 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
+    // State
+    user,
+    token,
     isLoading,
     error,
+    availableUsers,
+    // Getters
+    isAuthenticated,
+    currentUser,
+    // Actions
     login,
     register,
     logout,
+    clearAuth,
+    fetchUsers,
     fetchProfile,
     updateProfile,
     changePassword

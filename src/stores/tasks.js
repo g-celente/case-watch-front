@@ -8,6 +8,9 @@ export const useTasksStore = defineStore('tasks', () => {
     const currentTask = ref(null)
     const loading = ref(false)
     const error = ref(null)
+    const collaborators = ref([])
+    const userPermissions = ref({})
+    const assignee = ref(null)
     const pagination = ref({
         page: 1,
         limit: 10,
@@ -252,6 +255,159 @@ export const useTasksStore = defineStore('tasks', () => {
         pagination.value.page = 1
     }
 
+    // Collaboration Actions
+    const addCollaborator = async (taskId, userId, role) => {
+        try {
+            loading.value = true
+            error.value = null
+
+            const response = await api.tasks.addCollaborator(taskId, { userId, role })
+
+            if (response.data.success) {
+                // Update task in list
+                const taskIndex = tasks.value.findIndex(task => task.id === taskId)
+                if (taskIndex !== -1 && response.data.data.collaborators) {
+                    tasks.value[taskIndex].collaborators = response.data.data.collaborators
+                }
+
+                // Update current task if viewing
+                if (currentTask.value?.id === taskId) {
+                    currentTask.value.collaborators = response.data.data.collaborators
+                    await calculateUserPermissions(taskId)
+                }
+
+                return response.data.data
+            }
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erro ao adicionar colaborador'
+            console.error('Erro ao adicionar colaborador:', err)
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    const removeCollaborator = async (taskId, userId) => {
+        try {
+            loading.value = true
+            error.value = null
+
+            const response = await api.tasks.removeCollaborator(taskId, userId)
+
+            if (response.data.success) {
+                // Update task in list
+                const taskIndex = tasks.value.findIndex(task => task.id === taskId)
+                if (taskIndex !== -1 && response.data.data.collaborators) {
+                    tasks.value[taskIndex].collaborators = response.data.data.collaborators
+                }
+
+                // Update current task if viewing
+                if (currentTask.value?.id === taskId) {
+                    currentTask.value.collaborators = response.data.data.collaborators
+                    await calculateUserPermissions(taskId)
+                }
+
+                return response.data.data
+            }
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erro ao remover colaborador'
+            console.error('Erro ao remover colaborador:', err)
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    const assignTask = async (taskId, userId) => {
+        try {
+            loading.value = true
+            error.value = null
+
+            const response = await api.tasks.assignTask(taskId, { userId })
+
+            if (response.data.success) {
+                // Update task in list
+                const taskIndex = tasks.value.findIndex(task => task.id === taskId)
+                if (taskIndex !== -1) {
+                    tasks.value[taskIndex].assignee = response.data.data.assignee
+                }
+
+                // Update current task if viewing
+                if (currentTask.value?.id === taskId) {
+                    currentTask.value.assignee = response.data.data.assignee
+                    assignee.value = response.data.data.assignee
+                }
+
+                return response.data.data
+            }
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erro ao atribuir tarefa'
+            console.error('Erro ao atribuir tarefa:', err)
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    const unassignTask = async (taskId) => {
+        try {
+            loading.value = true
+            error.value = null
+
+            const response = await api.tasks.unassignTask(taskId)
+
+            if (response.data.success) {
+                // Update task in list
+                const taskIndex = tasks.value.findIndex(task => task.id === taskId)
+                if (taskIndex !== -1) {
+                    tasks.value[taskIndex].assignee = null
+                }
+
+                // Update current task if viewing
+                if (currentTask.value?.id === taskId) {
+                    currentTask.value.assignee = null
+                    assignee.value = null
+                }
+
+                return response.data.data
+            }
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Erro ao desatribuir tarefa'
+            console.error('Erro ao desatribuir tarefa:', err)
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    const calculateUserPermissions = async (taskId) => {
+        try {
+            const response = await api.tasks.getUserPermissions(taskId)
+            
+            if (response.data.success) {
+                userPermissions.value = response.data.data
+            }
+        } catch (err) {
+            console.error('Erro ao calcular permissões:', err)
+            userPermissions.value = {
+                canEdit: false,
+                canDelete: false,
+                canManageCollaborators: false,
+                canAssign: false,
+                currentUserRole: 'VIEWER'
+            }
+        }
+    }
+
+    const setCurrentTask = (task) => {
+        currentTask.value = task
+        if (task) {
+            collaborators.value = task.collaborators || []
+            assignee.value = task.assignee || null
+            calculateUserPermissions(task.id)
+        }
+    }
+
     return {
         // State
         tasks,
@@ -260,6 +416,9 @@ export const useTasksStore = defineStore('tasks', () => {
         error,
         pagination,
         filters,
+        collaborators,
+        userPermissions,
+        assignee,
 
         // Getters
         pendingTasks,
@@ -279,6 +438,13 @@ export const useTasksStore = defineStore('tasks', () => {
         setFilters,
         setPage,
         clearError,
-        resetFilters
+        resetFilters,
+        // Collaboration Actions
+        addCollaborator,
+        removeCollaborator,
+        assignTask,
+        unassignTask,
+        calculateUserPermissions,
+        setCurrentTask
     }
 })

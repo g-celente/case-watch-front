@@ -28,20 +28,24 @@ export default (httpClient) => ({
     return httpClient.patch(`/tasks/${id}/priority`, { priority })
   },
   // Atribuir tarefa
-  assignTask: (id, userId) => {
-    return httpClient.post(`/tasks/${id}/assign`, { userId })
+  assignTask: (id, data) => {
+    return httpClient.post(`/tasks/${id}/assign`, data)
   },
   // Desatribuir tarefa
-  unassignTask: (id, userId) => {
-    return httpClient.post(`/tasks/${id}/unassign`, { userId })
+  unassignTask: (id) => {
+    return httpClient.post(`/tasks/${id}/unassign`)
   },
   // Adicionar colaborador
-  addCollaborator: (id, userId, role = 'reviewer') => {
-    return httpClient.post(`/tasks/${id}/collaborators`, { userId, role })
+  addCollaborator: (id, data) => {
+    return httpClient.post(`/tasks/${id}/collaborate`, data)
   },
   // Remover colaborador
   removeCollaborator: (id, userId) => {
-    return httpClient.delete(`/tasks/${id}/collaborators`, { data: { userId } })
+    return httpClient.delete(`/tasks/${id}/collaborate`, { data: { userId } })
+  },
+  // Obter permissões do usuário
+  getUserPermissions: (id) => {
+    return httpClient.get(`/tasks/${id}/permissions`)
   },
   // Minhas tarefas
   getMyTasks: (params = {}) => {

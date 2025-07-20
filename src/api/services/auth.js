@@ -19,5 +19,11 @@ export default (httpClient) => ({
     },
     refreshToken: () => {
         return httpClient.post('/auth/refresh-token')
+    },
+    getUsers: (params = {}) => {
+        return httpClient.get('/users', { params })
+    },
+    getUserById: (id) => {
+        return httpClient.get(`/users/${id}`)
     }
 })
