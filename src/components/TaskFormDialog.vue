@@ -54,10 +54,10 @@
               }"
             >
               <option value="">Selecione a prioridade</option>
-              <option value="low">Baixa</option>
-              <option value="medium">Média</option>
-              <option value="high">Alta</option>
-              <option value="urgent">Urgente</option>
+              <option value="LOW">Baixa</option>
+              <option value="MEDIUM">Média</option>
+              <option value="HIGH">Alta</option>
+              <option value="URGENT">Urgente</option>
             </select>
           </template>
         </BaseFormField>
@@ -78,10 +78,10 @@
               }"
             >
               <option value="">Selecione o status</option>
-              <option value="pending">Pendente</option>
-              <option value="in_progress">Em Andamento</option>
-              <option value="completed">Concluída</option>
-              <option value="cancelled">Cancelada</option>
+              <option value="PENDING">Pendente</option>
+              <option value="IN_PROGRESS">Em Andamento</option>
+              <option value="COMPLETED">Concluída</option>
+              <option value="CANCELLED">Cancelada</option>
             </select>
           </template>
         </BaseFormField>

@@ -9,14 +9,19 @@ import TheContainer from '../components/TheContainer.vue'
 const routes = [
   // Rotas públicas (sem autenticação)
   {
+    path: '/teste',
+    name: 'teste',
+    component: () => import("../views/TasksView.vue")
+  },
+  {
     path: '/login',
-    name: 'Login',
+    name: 'login',
     component: LoginView,
     meta: { requiresGuest: true }
   },
   {
     path: '/register',
-    name: 'Register',
+    name: 'register',
     component: RegisterView,
     meta: { requiresGuest: true }
   },
@@ -33,18 +38,18 @@ const routes = [
       },
       {
         path: 'dashboard',
-        name: 'Dashboard',
+        name: 'dashboard', // Alterado para minúsculo
         component: () => import('../views/DashboardView.vue')
       },
       {
         path: 'tasks',
-        name: 'Tasks',
+        name: 'tasks', // Alterado para minúsculo
         component: () => import('../views/TasksView.vue'),
         meta: { title: 'Tarefas' }
       },
       {
         path: 'categories',
-        name: 'Categories',
+        name: 'categories', // Alterado para minúsculo
         component: () => import('../views/CategoriesView.vue'),
         meta: { title: 'Categorias' }
       },

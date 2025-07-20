@@ -1,66 +1,66 @@
 export default (httpClient) => ({
   // Listar tarefas 
   getTasks: (params = {}) => {
-    return httpClient.get('/api/tasks', { params })
+    return httpClient.get('/tasks')
   },
   // Buscar tarefa por ID
   getTask: (id) => {
-    return httpClient.get(`/api/tasks/${id}`)
+    return httpClient.get(`/tasks/${id}`)
   },
   // Criar tarefa
   createTask: (data) => {
-    return httpClient.post('/api/tasks', data)
+    return httpClient.post('/tasks', data)
   },
   // Atualizar tarefa
   updateTask: (id, data) => {
-    return httpClient.put(`/api/tasks/${id}`, data)
+    return httpClient.put(`/tasks/${id}`, data)
   },
   // Deletar tarefa
   deleteTask: (id) => {
-    return httpClient.delete(`/api/tasks/${id}`)
+    return httpClient.delete(`/tasks/${id}`)
   },
   // Atualizar status
   updateStatus: (id, status) => {
-    return httpClient.patch(`/api/tasks/${id}/status`, { status })
+    return httpClient.patch(`/tasks/${id}/status`, { status })
   },
   // Atualizar prioridade 
   updatePriority: (id, priority) => {
-    return httpClient.patch(`/api/tasks/${id}/priority`, { priority })
+    return httpClient.patch(`/tasks/${id}/priority`, { priority })
   },
   // Atribuir tarefa
   assignTask: (id, userId) => {
-    return httpClient.post(`/api/tasks/${id}/assign`, { userId })
+    return httpClient.post(`/tasks/${id}/assign`, { userId })
   },
   // Desatribuir tarefa
   unassignTask: (id, userId) => {
-    return httpClient.post(`/api/tasks/${id}/unassign`, { userId })
+    return httpClient.post(`/tasks/${id}/unassign`, { userId })
   },
   // Adicionar colaborador
   addCollaborator: (id, userId, role = 'reviewer') => {
-    return httpClient.post(`/api/tasks/${id}/collaborators`, { userId, role })
+    return httpClient.post(`/tasks/${id}/collaborators`, { userId, role })
   },
   // Remover colaborador
   removeCollaborator: (id, userId) => {
-    return httpClient.delete(`/api/tasks/${id}/collaborators`, { data: { userId } })
+    return httpClient.delete(`/tasks/${id}/collaborators`, { data: { userId } })
   },
   // Minhas tarefas
   getMyTasks: (params = {}) => {
-    return httpClient.get('/api/tasks/my', { params })
+    return httpClient.get('/tasks/my')
   },
   // Tarefas por status
   getTasksByStatus: (status) => {
-    return httpClient.get(`/api/tasks/status/${status}`)
+    return httpClient.get(`/tasks/status/${status}`)
   },
   // Tarefas em atraso
   getOverdueTasks: () => {
-    return httpClient.get('/api/tasks/overdue')
+    return httpClient.get('/tasks/overdue')
   },
   // Buscar tarefas
   searchTasks: (params = {}) => {
-    return httpClient.get('/api/tasks/search', { params })
+    return httpClient.get('/tasks/search')
   },
   // Estatísticas
   getStats: () => {
-    return httpClient.get('/api/tasks/stats')
+    return httpClient.get('/tasks/stats')
   }
 })

@@ -174,11 +174,19 @@ const handleSubmit = async () => {
     errorMessage.value = ''
 
     try {
-        await authStore.login({
+        const response = await authStore.login({
             email: form.value.email,
             password: form.value.password
         })
 
+        if (!response.data) {
+            error.value = true
+            errorMessage.value = 'Erro ao fazer login. Verifique suas credenciais.'
+            return
+        }
+
+        localStorage.setItem('token', response.data.token)
+        localStorage.setItem('user', JSON.stringify(response.data.user))
         router.push('/dashboard')
     } catch (err) {
         error.value = true

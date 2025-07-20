@@ -49,13 +49,13 @@ httpClient.interceptors.response.use(
         try {
           // Redireciona para login ou chama o serviço de renovação de token
           await AuthService.refreshToken().then((newToken) => {
-            localStorage.setItem("token-auth", newToken);
+            localStorage.setItem("token", newToken);
             onAccessTokenFetched(newToken); // Atualiza todas as requisições que aguardam o novo token
             originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
             isRefreshing = false;
           });
         } catch (err) {
-          localStorage.removeItem("token-auth");
+          localStorage.removeItem("token");
           window.location.href = "/login"; // Redireciona para a página de login
           return Promise.reject(err);
         }
