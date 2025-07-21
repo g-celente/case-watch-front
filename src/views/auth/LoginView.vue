@@ -1,16 +1,16 @@
 <template>
     <div class="flex min-h-screen">
         <!-- Form Section -->
-        <div class="flex-1 flex items-center justify-center bg-white dark:bg-gray-900 px-4 sm:px-6 lg:px-8">
+        <div class="flex-1 flex items-center justify-center bg-white px-4 sm:px-6 lg:px-8">
             <div class="max-w-md w-full space-y-8">
                 <div class="text-center">
                     <div class="mx-auto h-12 w-12 bg-primary rounded-lg flex items-center justify-center">
                         <CheckSquare class="w-8 h-8 text-white" />
                     </div>
-                    <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
+                    <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
                         Entre na sua conta
                     </h2>
-                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    <p class="mt-2 text-sm text-gray-600">
                         Ou
                         <router-link to="/register" class="font-medium text-primary hover:text-primary/80 ml-1">
                             crie uma nova conta

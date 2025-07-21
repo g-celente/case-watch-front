@@ -3,54 +3,36 @@
     <label v-if="label" class="block text-sm font-medium text-gray-700 mb-2">
       {{ label }}
     </label>
-    
+
     <div class="relative">
-      <input
-        ref="inputRef"
-        v-model="searchQuery"
-        type="text"
-        :placeholder="placeholder"
-        @input="handleSearch"
-        @focus="isOpen = true"
-        @keydown="handleKeydown"
+      <input ref="inputRef" v-model="searchQuery" type="text" :placeholder="placeholder" @input="handleSearch"
+        @focus="isOpen = true" @keydown="handleKeydown"
         class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-        :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': error }"
-      />
-      
+        :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': error }" />
+
       <div class="absolute inset-y-0 right-0 flex items-center pr-2">
-        <ChevronDown 
-          class="h-4 w-4 text-gray-400 transition-transform duration-200"
-          :class="{ 'rotate-180': isOpen }"
-        />
+        <ChevronDown class="h-4 w-4 text-gray-400 transition-transform duration-200"
+          :class="{ 'rotate-180': isOpen }" />
       </div>
     </div>
 
     <!-- Selected Users Preview -->
     <div v-if="selectedUsers && selectedUsers.length > 0" class="mt-3 flex flex-wrap gap-2">
-      <div
-        v-for="user in selectedUsers"
-        :key="user.id"
-        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-sm"
-      >
+      <div v-for="user in selectedUsers" :key="user.id"
+        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-sm">
         <div class="h-5 w-5 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-medium">
           {{ getInitials(user.name) }}
         </div>
         <span>{{ user.name }}</span>
-        <button
-          @click="removeUser(user)"
-          type="button"
-          class="ml-1 hover:bg-purple-200 rounded-full p-0.5"
-        >
+        <button @click="removeUser(user)" type="button" class="ml-1 hover:bg-purple-200 rounded-full p-0.5">
           <X class="h-3 w-3" />
         </button>
       </div>
     </div>
 
     <!-- Dropdown -->
-    <div
-      v-if="isOpen"
-      class="absolute z-50 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none"
-    >
+    <div v-if="isOpen"
+      class="absolute z-50 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none">
       <!-- Loading State -->
       <div v-if="loading" class="px-3 py-2 text-gray-500 text-sm">
         <div class="flex items-center">
@@ -65,20 +47,16 @@
       </div>
 
       <!-- Users List -->
-      <div
-        v-for="(user, index) in filteredUsers"
-        :key="user.id"
-        @click="selectUser(user)"
-        @mouseenter="highlightedIndex = index"
-        class="cursor-pointer select-none relative px-3 py-2 hover:bg-gray-100"
+      <div v-for="(user, index) in filteredUsers" :key="user.id" @click="selectUser(user)"
+        @mouseenter="highlightedIndex = index" class="cursor-pointer select-none relative px-3 py-2 hover:bg-gray-100"
         :class="{
           'bg-purple-100': highlightedIndex === index,
           'opacity-50': isUserSelected(user)
-        }"
-      >
+        }">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
-            <div class="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center text-white text-sm font-medium mr-3">
+            <div
+              class="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center text-white text-sm font-medium mr-3">
               {{ getInitials(user.name) }}
             </div>
             <div>
@@ -86,10 +64,7 @@
               <div class="text-xs text-gray-500">{{ user.email }}</div>
             </div>
           </div>
-          <Check 
-            v-if="isUserSelected(user)" 
-            class="h-4 w-4 text-purple-600" 
-          />
+          <Check v-if="isUserSelected(user)" class="h-4 w-4 text-purple-600" />
         </div>
       </div>
     </div>
@@ -113,7 +88,7 @@ const props = defineProps({
     default: 'Buscar usuários...'
   },
   modelValue: {
-    type: Array,
+    type: [Array, Object],
     default: () => []
   },
   multiple: {
@@ -144,8 +119,14 @@ const inputRef = ref(null)
 
 // Computed
 const selectedUsers = computed({
-  get: () => props.modelValue || [],
-  set: (value) => emit('update:modelValue', value || [])
+  get: () => {
+    if (props.multiple) return props.modelValue || []
+    return props.modelValue ? [props.modelValue] : []
+  },
+  set: (value) => {
+    const newValue = props.multiple ? value : value[0] || null
+    emit('update:modelValue', newValue)
+  }
 })
 
 const availableUsers = computed(() => authStore.availableUsers || [])
@@ -161,8 +142,8 @@ const filteredUsers = computed(() => {
   // Filter by search query
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase()
-    users = users.filter(user => 
-      user.name.toLowerCase().includes(query) || 
+    users = users.filter(user =>
+      user.name.toLowerCase().includes(query) ||
       user.email.toLowerCase().includes(query)
     )
   }
@@ -195,6 +176,7 @@ const selectUser = (user) => {
   let newValue
   if (props.multiple) {
     newValue = [...selectedUsers.value, user]
+    searchQuery.value = ''
   } else {
     newValue = [user]
     isOpen.value = false
@@ -202,19 +184,16 @@ const selectUser = (user) => {
   }
 
   selectedUsers.value = newValue
-  emit('change', newValue)
-
-  if (props.multiple) {
-    searchQuery.value = ''
-    inputRef.value?.focus()
-  }
+  emit('change', props.multiple ? newValue : user)
 }
+
 
 const removeUser = (user) => {
   const newValue = selectedUsers.value.filter(selected => selected.id !== user.id)
   selectedUsers.value = newValue
-  emit('change', newValue)
+  emit('change', props.multiple ? newValue : null)
 }
+
 
 const handleSearch = async () => {
   if (!authStore.availableUsers.length) {

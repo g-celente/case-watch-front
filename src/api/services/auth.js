@@ -15,7 +15,7 @@ export default (httpClient) => ({
         return httpClient.put('/auth/profile', profileData)
     },
     changePassword: (passwordData) => {
-        return httpClient.put('/auth/change-password', passwordData)
+        return httpClient.post('/auth/change-password', passwordData)
     },
     refreshToken: () => {
         return httpClient.post('/auth/refresh-token')

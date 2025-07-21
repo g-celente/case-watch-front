@@ -1,16 +1,16 @@
 <template>
   <div class="flex min-h-screen">
     <!-- Form Section -->
-    <div class="flex-1 flex items-center justify-center bg-white dark:bg-gray-900 px-4 sm:px-6 lg:px-8">
+    <div class="flex-1 flex items-center justify-center bg-white  px-4 sm:px-6 lg:px-8">
       <div class="max-w-md w-full space-y-8">
         <div class="text-center">
           <div class="mx-auto h-12 w-12 bg-primary rounded-lg flex items-center justify-center">
             <CheckSquare class="w-8 h-8 text-white" />
           </div>
-          <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
+          <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
             Crie sua conta
           </h2>
-          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p class="mt-2 text-sm text-gray-600">
             Ou
             <router-link
               to="/login"
@@ -94,7 +94,7 @@
                   </button>
                 </div>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Mínimo de 6 caracteres
+                  Mínimo de 8 caracteres
                 </p>
               </div>
 
@@ -242,8 +242,8 @@ const passwordError = computed(() => {
       return 'As senhas não coincidem'
     }
   }
-  if (form.value.password && form.value.password.length < 6) {
-    return 'A senha deve ter pelo menos 6 caracteres'
+  if (form.value.password && form.value.password.length < 8) {
+    return 'A senha deve ter pelo menos 8 caracteres'
   }
   return null
 })
