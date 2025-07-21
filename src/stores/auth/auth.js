@@ -9,6 +9,10 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref(null)
   const isLoading = ref(false)
   const availableUsers = ref([])
+  const userStats = ref(null)
+  const userActivities = ref([])
+  const isUpdatingProfile = ref(false)
+  const isUploadingPhoto = ref(false)
 
   // Getters
   const isAuthenticated = computed(() => !!token.value)
@@ -89,6 +93,12 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       error.value = null
       const response = await api.auth.getProfile()
+      
+      if (response.data.success) {
+        user.value = response.data.data
+        localStorage.setItem('user', JSON.stringify(user.value))
+      }
+      
       return response.data
     } catch (err) {
       console.error('Erro ao buscar perfil:', err)
@@ -99,13 +109,21 @@ export const useAuthStore = defineStore('auth', () => {
   const updateProfile = async (profileData) => {
     try {
       error.value = null
+      isUpdatingProfile.value = true
 
       const response = await api.auth.updateProfile(profileData)
+
+      if (response.data.success) {
+        user.value = { ...user.value, ...profileData }
+        localStorage.setItem('user', JSON.stringify(user.value))
+      }
 
       return response.data
     } catch (err) {
       error.value = err.response?.data?.message || 'Erro ao atualizar perfil'
       throw err
+    } finally {
+      isUpdatingProfile.value = false
     }
   }
 
@@ -122,6 +140,65 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const fetchUserStats = async () => {
+    try {
+      error.value = null
+      const response = await api.auth.getUserStats()
+      
+      if (response.data.success) {
+        userStats.value = response.data.data
+      }
+      
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erro ao buscar estatísticas do usuário'
+      console.error('Erro ao buscar estatísticas:', err)
+      throw err
+    }
+  }
+
+  const fetchUserActivities = async (params = {}) => {
+    try {
+      error.value = null
+      const response = await api.auth.getUserActivities(params)
+      
+      if (response.data.success) {
+        userActivities.value = response.data.data
+      }
+      
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erro ao buscar atividades do usuário'
+      console.error('Erro ao buscar atividades:', err)
+      throw err
+    }
+  }
+
+  const uploadProfilePhoto = async (file) => {
+    try {
+      error.value = null
+      isUploadingPhoto.value = true
+      
+      const formData = new FormData()
+      formData.append('photo', file)
+      
+      const response = await api.auth.uploadProfilePhoto(formData)
+      
+      if (response.data.success) {
+        user.value = { ...user.value, photoUrl: response.data.data.photoUrl }
+        localStorage.setItem('user', JSON.stringify(user.value))
+      }
+      
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Erro ao fazer upload da foto'
+      console.error('Erro ao fazer upload da foto:', err)
+      throw err
+    } finally {
+      isUploadingPhoto.value = false
+    }
+  }
+
   return {
     // State
     user,
@@ -129,6 +206,10 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading,
     error,
     availableUsers,
+    userStats,
+    userActivities,
+    isUpdatingProfile,
+    isUploadingPhoto,
     // Getters
     isAuthenticated,
     currentUser,
@@ -140,6 +221,9 @@ export const useAuthStore = defineStore('auth', () => {
     fetchUsers,
     fetchProfile,
     updateProfile,
-    changePassword
+    changePassword,
+    fetchUserStats,
+    fetchUserActivities,
+    uploadProfilePhoto
   }
 })

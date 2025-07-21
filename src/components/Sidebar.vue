@@ -106,6 +106,11 @@ const navigationItems = [
     path: '/reports',
     icon: BarChart3
   },
+  {
+    name: 'Meu Perfil',
+    path: '/profile',
+    icon: User
+  },
 ]
 
 const handleLogout = async () => {

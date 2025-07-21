@@ -25,5 +25,18 @@ export default (httpClient) => ({
     },
     getUserById: (id) => {
         return httpClient.get(`/users/${id}`)
+    },
+    getUserStats: () => {
+        return httpClient.get('/users/me/stats')
+    },
+    getUserActivities: (params = {}) => {
+        return httpClient.get('/users/me/activities', { params })
+    },
+    uploadProfilePhoto: (formData) => {
+        return httpClient.post('/users/me/photo', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
     }
 })
